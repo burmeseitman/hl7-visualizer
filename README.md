@@ -2,6 +2,9 @@
 
 ![HL7 Visualizer Preview](./screenshots/app_preview.png)
 
+## 🌐 Live Demo
+[https://hl7-visualizer.vercel.app](https://hl7-visualizer.vercel.app)
+
 ## 🩺 Overview
 **HL7 Visualizer** is a specialized tool developed for healthcare integration engineers and clinicians. It transforms raw, human-unfriendly pipe-delimited HL7 v2 messages into an interactive, hierarchical data structure, providing instant clarity to complex medical data.
 

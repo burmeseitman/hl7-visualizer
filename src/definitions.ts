@@ -1,113 +1,130 @@
 export interface Definition {
   name: string;
   description: string;
-  fields?: Record<string, string>;
+  fields?: Record<string, FieldDefinition>;
 }
+
+export interface FieldDefinition {
+  name: string;
+  dataType?: string;
+  description?: string;
+}
+
+export interface DataTypeDefinition {
+  name: string;
+  components: Record<string, string>;
+}
+
+export const MESSAGE_TYPES: Record<string, string> = {
+  "ADT": "Admit, Discharge, Transfer - Used to exchange patient demographic and visit information.",
+  "ORM": "Order Message - Used to transmit information about a health service order.",
+  "ORU": "Observation Result - Used to transmit laboratory results or other clinical observations.",
+  "SIU": "Scheduling Information - Used to exchange information about scheduled appointments.",
+  "VXU": "Vaccination Record - Used to transmit immunization information.",
+  "ACK": "General Acknowledgment - Used to acknowledge receipt of a message."
+};
+
+export const MESSAGE_EVENTS: Record<string, string> = {
+  "A01": "Admit/Visit Notification",
+  "A03": "Discharge/End Visit",
+  "A04": "Register a Patient",
+  "A08": "Update Patient Information",
+  "O01": "Order Message",
+  "R01": "Unsolicited Transmission of an Observation Message",
+  "S12": "New Appointment Booking",
+  "V04": "Unsolicited Vaccination Record Update"
+};
+
+export const DATA_TYPES: Record<string, DataTypeDefinition> = {
+  XPN: {
+    name: "Extended Person Name",
+    components: {
+      "1": "Family Name (Surname)",
+      "2": "Given Name (First Name)",
+      "3": "Second/Further Names (Middle Name/Initial)",
+      "4": "Suffix (e.g., JR, III)",
+      "5": "Prefix (e.g., DR, MR, MS)",
+      "6": "Degree (e.g., MD, PHD)",
+      "7": "Name Type Code (L=Legal, D=Display, M=Maiden)"
+    }
+  },
+  XAD: {
+    name: "Extended Address",
+    components: {
+      "1": "Street Address",
+      "2": "Other Designation (Apt, Suite)",
+      "3": "City",
+      "4": "State or Province",
+      "5": "Zip or Postal Code",
+      "6": "Country",
+      "7": "Address Type (H=Home, B=Business)"
+    }
+  },
+  CWE: {
+    name: "Coded with Exceptions",
+    components: {
+      "1": "Identifier (Code)",
+      "2": "Text (Description)",
+      "3": "Name of Coding System (e.g., LN, SCT)",
+      "4": "Alternate Identifier",
+      "5": "Alternate Text",
+      "6": "Name of Alternate Coding System"
+    }
+  }
+};
 
 export const HL7_DEFINITIONS: Record<string, Definition> = {
   MSH: {
     name: "Message Header",
     description: "The MSH segment contains information about the message itself, such as sender, receiver, message type, and version.",
     fields: {
-      "1": "Field Separator",
-      "2": "Encoding Characters",
-      "3": "Sending Application",
-      "4": "Sending Facility",
-      "5": "Receiving Application",
-      "6": "Receiving Facility",
-      "7": "Date/Time of Message",
-      "9": "Message Type",
-      "10": "Message Control ID",
-      "11": "Processing ID",
-      "12": "Version ID"
+      "1": { name: "Field Separator" },
+      "2": { name: "Encoding Characters" },
+      "3": { name: "Sending Application" },
+      "4": { name: "Sending Facility" },
+      "5": { name: "Receiving Application" },
+      "6": { name: "Receiving Facility" },
+      "7": { name: "Date/Time of Message" },
+      "9": { name: "Message Type", dataType: "MSG" },
+      "10": { name: "Message Control ID" },
+      "11": { name: "Processing ID" },
+      "12": { name: "Version ID" }
     }
   },
   PID: {
     name: "Patient Identification",
     description: "The PID segment is used by all applications as the primary method of addressing the patient for an event.",
     fields: {
-      "3": "Patient Identifier List",
-      "5": "Patient Name",
-      "7": "Date/Time of Birth",
-      "8": "Administrative Sex",
-      "11": "Patient Address",
-      "13": "Phone Number - Home",
-      "14": "Phone Number - Business",
-      "18": "Patient Account Number",
-      "19": "SSN Number - Patient"
+      "1": { name: "Set ID - PID" },
+      "3": { name: "Patient Identifier List" },
+      "5": { name: "Patient Name", dataType: "XPN" },
+      "7": { name: "Date/Time of Birth" },
+      "8": { name: "Administrative Sex" },
+      "11": { name: "Patient Address", dataType: "XAD" },
+      "13": { name: "Phone Number - Home" },
+      "18": { name: "Patient Account Number" }
     }
   },
   PV1: {
     name: "Patient Visit",
     description: "The PV1 segment is used by registration applications to communicate information on an account or visit-specific basis.",
     fields: {
-      "2": "Patient Class",
-      "3": "Assigned Patient Location",
-      "7": "Attending Doctor",
-      "8": "Referring Doctor",
-      "10": "Hospital Service",
-      "19": "Visit Number",
-      "44": "Admit Date/Time"
+      "2": { name: "Patient Class" },
+      "3": { name: "Assigned Patient Location" },
+      "7": { name: "Attending Doctor", dataType: "XCN" },
+      "19": { name: "Visit Number" },
+      "44": { name: "Admit Date/Time" }
     }
   },
   OBX: {
     name: "Observation/Result",
     description: "The OBX segment is used to transmit a single observation or observation fragment.",
     fields: {
-      "2": "Value Type",
-      "3": "Observation Identifier",
-      "5": "Observation Value",
-      "6": "Units",
-      "7": "References Range",
-      "8": "Abnormal Flags",
-      "11": "Observation Result Status",
-      "14": "Date/Time of the Observation"
-    }
-  },
-  OBR: {
-    name: "Observation Request",
-    description: "The OBR segment is used to transmit information about an observation request.",
-    fields: {
-      "4": "Universal Service Identifier",
-      "7": "Observation Date/Time",
-      "16": "Ordering Provider"
-    }
-  },
-  EVN: {
-    name: "Event Type",
-    description: "The EVN segment is used to communicate necessary trigger event information to receiving applications.",
-    fields: {
-      "1": "Event Type Code",
-      "2": "Recorded Date/Time",
-      "4": "Event Reason Code"
-    }
-  },
-  NK1: {
-    name: "Next of Kin",
-    description: "The NK1 segment contains information about the patient's next of kin or associated parties.",
-    fields: {
-      "2": "Name",
-      "3": "Relationship",
-      "13": "Organization Name - NK1"
-    }
-  },
-  DG1: {
-    name: "Diagnosis",
-    description: "The DG1 segment contains patient diagnosis information.",
-    fields: {
-      "3": "Diagnosis Code - DG1",
-      "6": "Diagnosis Type"
+      "2": { name: "Value Type" },
+      "3": { name: "Observation Identifier", dataType: "CWE" },
+      "5": { name: "Observation Value" },
+      "6": { name: "Units", dataType: "CWE" },
+      "11": { name: "Observation Result Status" }
     }
   }
-};
-
-export const getDefinition = (type: string, key?: string): string => {
-  const segmentDef = HL7_DEFINITIONS[type];
-  if (!segmentDef) return "No description available for this segment.";
-  
-  if (key && segmentDef.fields && segmentDef.fields[key]) {
-    return `${segmentDef.fields[key]} (${segmentDef.name} - ${key}): ${segmentDef.description}`;
-  }
-  
-  return `${segmentDef.name}: ${segmentDef.description}`;
 };

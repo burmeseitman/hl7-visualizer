@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronRight, 
@@ -12,9 +12,11 @@ import {
   HelpCircle,
   Stethoscope
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { parseHL7 } from './hl7Parser';
 import type { HL7Node } from './hl7Parser';
-import { HL7_DEFINITIONS } from './definitions';
+import { HL7_DEFINITIONS, MESSAGE_TYPES, MESSAGE_EVENTS, DATA_TYPES } from './definitions';
 import './App.css';
 
 const DEFAULT_MESSAGE = `MSH|^~\\&|LAB|GENERIC|ADT|DEST|202310231200||ADT^A01|12345|P|2.5\rPID|1||12345^^^MR||SMITH^JOHN^A||19800101|M|||123 MAIN ST^^ANYTOWN^NY^12345||(555)555-5555\rPV1|1|I|2000^2001^01||||1234^DOCTOR^JOE|||||||||||1234567\rOBX|1|NM|50813-0^Oxygen Saturation^LN||98|%|95-100|N|||F|||202310231200`;
@@ -43,28 +45,60 @@ const App: React.FC = () => {
   const getExplanation = (node: HL7Node | null) => {
     if (!node) return "Select an item from the tree to see its definition.";
 
-    // Get segment name (if it's a segment node, it's label; if it's field, it's split from label)
     let segmentCode = '';
     let fieldIdx = '';
+    let compIdx = '';
 
     if (node.type === 'segment') {
       segmentCode = node.label;
     } else {
       const parts = node.label.split('-');
       segmentCode = parts[0];
-      fieldIdx = parts[1]?.split('.')[0]; // Handle components too
+      const fieldParts = parts[1]?.split('.') || [];
+      fieldIdx = fieldParts[0];
+      compIdx = fieldParts[1];
     }
 
     const definitionData = HL7_DEFINITIONS[segmentCode];
-    if (!definitionData) return `No detailed definition for segment "${segmentCode}". HL7 segments contain industrial standard data structures.`;
+    if (!definitionData) return `No detailed definition for segment **${segmentCode}**. HL7 segments contain industrial standard data structures.`;
 
-    let text = `### ${definitionData.name} (${segmentCode})\n\n${definitionData.description}\n\n`;
+    let text = `# ${definitionData.name} (${segmentCode})\n\n${definitionData.description}\n\n`;
 
-    if (node.type === 'field' || node.type === 'component') {
-      const fieldDesc = definitionData.fields?.[fieldIdx];
-      if (fieldDesc) {
-        text += `---\n**Field ${fieldIdx}**: ${fieldDesc}\n\n`;
+    // Handle Message Type Special Case (MSH-9)
+    if (segmentCode === 'MSH' && fieldIdx === '9') {
+      const val = node.value || "";
+      const [type, event] = val.split('^');
+      text += `---\n### Field 9: Message Type\n\n`;
+      if (type) text += `**Type**: \`${type}\` — ${MESSAGE_TYPES[type] || "Unknown Message Type"}\n\n`;
+      if (event) text += `**Event**: \`${event}\` — ${MESSAGE_EVENTS[event] || "Unknown Event Type"}\n\n`;
+      return text;
+    }
+
+    if (node.type === 'field' || node.type === 'component' || node.type === 'sub-component') {
+      const fieldDef = definitionData.fields?.[fieldIdx];
+      if (fieldDef) {
+        text += `---\n### Field ${fieldIdx}: ${fieldDef.name}\n\n`;
+        
+        // Check for Data Type Breakdown
+        if (fieldDef.dataType && DATA_TYPES[fieldDef.dataType]) {
+          const dataType = DATA_TYPES[fieldDef.dataType];
+          text += `**Data Type**: \`${dataType.name}\` (${fieldDef.dataType})\n\n`;
+          
+          if (compIdx) {
+            const compName = dataType.components[compIdx];
+            if (compName) {
+              text += `**Component ${compIdx}: ${compName}**\n\n`;
+            }
+          } else {
+            text += `#### Component Breakdown:\n`;
+            Object.entries(dataType.components).forEach(([idx, name]) => {
+              text += `- **${idx}**: ${name}\n`;
+            });
+            text += `\n`;
+          }
+        }
       }
+      
       if (node.value) {
         text += `**Raw Value**: \`${node.value}\``;
       }
@@ -155,9 +189,9 @@ const App: React.FC = () => {
                   </div>
                   <div className="def-body">
                     <div className="def-markdown">
-                      {getExplanation(selectedNode).split('\n\n').map((para, i) => (
-                        <p key={i}>{para.startsWith('###') ? <strong>{para.replace('###', '')}</strong> : para}</p>
-                      ))}
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {getExplanation(selectedNode)}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 </motion.div>

@@ -247,21 +247,59 @@
 .badge.component { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
 
 .def-body {
-  line-height: 1.7;
-}
-
-.def-markdown p {
-  margin-bottom: 1rem;
+  line-height: 1.6;
   font-size: 0.95rem;
   color: var(--text-main);
 }
 
-.def-markdown strong {
-  display: block;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
+.def-markdown h1 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
   color: var(--primary);
+  border-bottom: 2px solid rgba(14, 165, 233, 0.2);
+  padding-bottom: 0.5rem;
+}
+
+.def-markdown h3 {
   font-size: 1.1rem;
+  margin: 1.5rem 0 0.75rem 0;
+  color: var(--primary);
+}
+
+.def-markdown h4 {
+  font-size: 0.9rem;
+  margin: 1rem 0 0.5rem 0;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.def-markdown p {
+  margin-bottom: 1rem;
+}
+
+.def-markdown ul {
+  margin-bottom: 1rem;
+  padding-left: 1.25rem;
+}
+
+.def-markdown li {
+  margin-bottom: 0.25rem;
+}
+
+.def-markdown hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+.def-markdown code {
+  background: rgba(14, 165, 233, 0.1);
+  color: var(--primary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9em;
 }
 
 /* Footer */

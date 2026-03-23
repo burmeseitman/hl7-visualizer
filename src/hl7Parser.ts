@@ -20,7 +20,6 @@ export const parseHL7 = (raw: string): HL7Node[] => {
   const fieldSep = raw.charAt(3) || '|'; // Always check position 4 (index 3) of MSH
   const compSep = (raw.charAt(4) || '^').substring(0, 1);
   const subCompSep = (raw.charAt(7) || '&').substring(0, 1);
-  const repeatSep = (raw.charAt(5) || '~').substring(0, 1);
 
   return segments.map((segLine, sIdx) => {
     const fields = segLine.split(fieldSep);

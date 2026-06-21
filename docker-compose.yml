@@ -1,0 +1,9 @@
+services:
+  hl7-visualizer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
+    container_name: hl7-visualizer-app
+    restart: unless-stopped

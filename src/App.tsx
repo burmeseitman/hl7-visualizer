@@ -23,7 +23,6 @@ import {
   Hash,
   Activity,
   ArrowRight,
-  ChevronUp,
   Eye,
   EyeOff,
   RefreshCw,
@@ -85,28 +84,6 @@ const calcAge = (dob: string): number | null => {
   return age >= 0 ? age : null;
 };
 
-// Tokenise a raw HL7 line into coloured spans
-const tokenizeLine = (line: string, fieldSep: string, segmentColors: Record<string, string>) => {
-  const parts = line.split(fieldSep);
-  const segName = parts[0];
-  const color = segmentColors[segName] || '#94a3b8';
-  const tokens: { text: string; cls: string; color?: string }[] = [];
-
-  tokens.push({ text: segName, cls: 'hl7-seg-name', color });
-  for (let i = 1; i < parts.length; i++) {
-    tokens.push({ text: fieldSep, cls: 'hl7-sep-field' });
-    // highlight sub-separators inside each field
-    const field = parts[i];
-    const innerTokens = field.split(/([\^~&])/).map((chunk, ci) => {
-      if (chunk === '^') return <span key={ci} className="hl7-sep-comp">^</span>;
-      if (chunk === '~') return <span key={ci} className="hl7-sep-rep">~</span>;
-      if (chunk === '&') return <span key={ci} className="hl7-sep-sub">&amp;</span>;
-      return <span key={ci}>{chunk}</span>;
-    });
-    tokens.push({ text: field, cls: 'hl7-field-val', inner: innerTokens } as never);
-  }
-  return { tokens, segName, color };
-};
 
 // ─── Patient Summary ──────────────────────────────────────────────────────────
 interface PatientSummaryProps {

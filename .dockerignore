@@ -1,9 +1,27 @@
+# Dependencies & build output
 node_modules
 dist
+
+# Version control
 .git
 .gitignore
+
+# Docker files themselves
 .dockerignore
 Dockerfile
 docker-compose.yml
+
+# Docs & meta
 README.md
-npm-debug.log
+screenshots
+host-nginx.conf
+
+# Logs & temp
+npm-debug.log*
+*.log
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
